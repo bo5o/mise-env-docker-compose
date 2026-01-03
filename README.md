@@ -68,12 +68,28 @@ When `replace_hosts` is enabled, environment variable values like `postgres:5432
 be replaced with `localhost:5433` (using the published port from your Docker Compose
 configuration).
 
+### Include Build Arguments
+
+Load build arguments from the `build.args` section of your services:
+
+```toml
+[env]
+_.env-docker-compose = { include_build_args = true }
+```
+
+When `include_build_args` is enabled, the plugin will extract variables from the
+`build.args` section in addition to the `environment` section. This is useful when you
+need build-time variables available in your local development environment.
+
 ## How It Works
 
 1. The plugin runs `docker compose config --format json` to get the parsed configuration
 1. It extracts environment variables from the `environment` section of each service
+1. If `include_build_args` is enabled, it also extracts variables from the `build.args`
+   section
 1. It optionally filters by service names and variable names
-1. If `replace_hosts` is enabled, it replaces `service:port` references with `localhost:published_port`
+1. If `replace_hosts` is enabled, it replaces `service:port` references with
+   `localhost:published_port`
 1. The resulting environment variables are made available in your shell
 
 ## Example
@@ -110,6 +126,36 @@ Your shell environment will have:
 
 - `DATABASE_URL=localhost:5433` (replaced `postgres:5432` with `localhost:5433`)
 - `API_KEY=secret123`
+
+### Example with Build Arguments
+
+Given a `docker-compose.yml` with build args:
+
+```yaml
+---
+services:
+  app:
+    build:
+      context: .
+      args:
+        NODE_VERSION: "20"
+        BUILD_ENV: production
+    environment:
+      APP_PORT: "3000"
+```
+
+With this configuration:
+
+```toml
+[env]
+_.env-docker-compose = { include_build_args = true }
+```
+
+Your shell environment will have:
+
+- `NODE_VERSION=20`
+- `BUILD_ENV=production`
+- `APP_PORT=3000`
 
 ## Requirements
 
