@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- Quick Start section in README with minimal example
 - CHANGELOG.md following Keep a Changelog format
 
 ## [0.2.1] - 2026-01-03

@@ -22,6 +22,41 @@ env-docker-compose = "https://github.com/bo5o/mise-env-docker-compose"
 _.source = "env-docker-compose"
 ```
 
+## Quick Start
+
+Here's a minimal example to get started:
+
+**docker-compose.yml:**
+
+```yaml {docker-compose.yml}
+---
+services:
+  app:
+    image: node:20
+    environment:
+      DATABASE_URL: postgres://db:5432/myapp
+      API_KEY: dev-key-123
+```
+
+**mise.toml:**
+
+```toml {mise.toml}
+[env]
+_.env-docker-compose = {}
+```
+
+**Result:**
+
+```sh
+$ echo $DATABASE_URL
+postgres://db:5432/myapp
+$ echo $API_KEY
+dev-key-123
+```
+
+The plugin automatically extracts all environment variables from your Docker Compose
+services and makes them available in your shell.
+
 ## Configuration
 
 The plugin supports several configuration options to control which environment variables
