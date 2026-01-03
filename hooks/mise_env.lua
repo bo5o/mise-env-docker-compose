@@ -45,13 +45,18 @@ end
 ---@field services? string[]
 ---@field variables? string[]
 ---@field replace_hosts? boolean
+---@field include_build_args? boolean
 
 ---@class EnvVar
 ---@field key string
 ---@field value string
 
+---@class DockerComposeBuildConfig
+---@field args? table<string, string>
+
 ---@class DockerComposeServiceConfig
 ---@field environment? table<string, string>
+---@field build? DockerComposeBuildConfig
 
 ---@class DockerComposeConfig
 ---@field services table<string, DockerComposeServiceConfig>
@@ -76,9 +81,14 @@ function PLUGIN:MiseEnv(ctx)
   local service_filter = ctx.options.services
   local variable_filter = ctx.options.variables
   local replace_hosts = ctx.options.replace_hosts
+  local include_build_args = ctx.options.include_build_args
 
   if replace_hosts == nil then
     replace_hosts = false
+  end
+
+  if include_build_args == nil then
+    include_build_args = false
   end
 
   for service_name, service_config in pairs(configuration.services) do
@@ -92,6 +102,20 @@ function PLUGIN:MiseEnv(ctx)
             value = replace_host(value, host_map)
           end
           table.insert(env, { key = key, value = value })
+        end
+      end
+    end
+
+    if include_build_args and (not service_filter or is_selected) then
+      local has_build_args = service_config.build and service_config.build.args
+      if has_build_args then
+        for key, value in pairs(service_config.build.args) do
+          if not variable_filter or contains(variable_filter, key) then
+            if replace_hosts then
+              value = replace_host(value, host_map)
+            end
+            table.insert(env, { key = key, value = value })
+          end
         end
       end
     end
